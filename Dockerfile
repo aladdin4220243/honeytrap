@@ -5,5 +5,4 @@ COPY config.toml /config/config.toml
 
 EXPOSE 8022
 
-ENTRYPOINT []
-CMD ["honeytrap", "--config", "/config/config.toml", "--data", "/data/"]
+CMD ["--config", "/config/config.toml", "--data", "/data/"]
