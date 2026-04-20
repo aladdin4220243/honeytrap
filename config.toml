@@ -13,7 +13,6 @@ type = "ssh-simulator"
 credentials = ["root:root", "admin:admin"]
 
 [[port]]
-
 ports = ["tcp/8022"]
 services = ["ssh-simulator"]
 
