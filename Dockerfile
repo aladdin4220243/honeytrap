@@ -1,14 +1,5 @@
-FROM honeytrap/honeytrap:latest
-
-# إنشاء المجلدات المطلوبة
+FROM ghcr.io/honeytrap/honeytrap:latest
 RUN mkdir -p /config /data
-
-# نسخ ملف التكوين
 COPY config.toml /config/config.toml
-
-# تعريض المنفذ
 EXPOSE 8022
-
-# تجاوز نقطة الدخول الأصلية وتشغيل honeytrap مباشرة
-ENTRYPOINT ["honeytrap"]
-CMD ["--config", "/config/config.toml", "--data", "/data/"]
+CMD ["honeytrap", "--config", "/config/config.toml", "--data", "/data/"]
