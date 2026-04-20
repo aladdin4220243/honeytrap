@@ -18,9 +18,10 @@ RUN apk add ca-certificates && update-ca-certificates
 
 RUN mkdir /config /data
 
-RUN curl -s -o /config/config.toml https://raw.githubusercontent.com/honeytrap/honeytrap-configs/master/server-standalone/config-server-standalone.toml
+# تحميل ملف التكوين (سنضيفه بأنفسنا بدلاً من الرابط الافتراضي)
+COPY config.toml /config/config.toml
 COPY --from=go /go/bin/app /honeytrap/honeytrap
 
 ENTRYPOINT ["/honeytrap/honeytrap", "--config", "/config/config.toml", "--data", "/data/"]
 
-EXPOSE 8022 5900
+EXPOSE 8022 8080
