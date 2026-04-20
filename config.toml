@@ -1,21 +1,26 @@
+# تحديد قناة الإخراج (Channel) لنظام Ingestion
 [channel.ingestion]
 type = "webhook"
 url = "https://ingestion-production-714d.up.railway.app/ingest/honeytrap"
 method = "POST"
 headers = { "Content-Type" = "application/json" }
 
+# تصفية الأحداث (Filter): كل الأحداث ستُرسل إلى القناة المحددة
 [[filter]]
 type = "events"
 channel = ["ingestion"]
 
+# خدمة محاكاة SSH التي ستصطاد الهجمات
 [service.ssh-simulator]
 type = "ssh-simulator"
-credentials = ["root:root", "admin:admin"]
+credentials = ["root:root", "admin:admin", "test:test"]
 
+# ربط الخدمة بالمنفذ داخل الحاوية
 [[port]]
 ports = ["tcp/8022"]
 services = ["ssh-simulator"]
 
+# تفعيل التسجيل لمتابعة العملية
 [[logging]]
 output = "stdout"
 level = "debug"
