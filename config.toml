@@ -1,25 +1,25 @@
-# قناة الإخراج إلى ingestion
+# قناة الإخراج إلى ingestion service
 [channel.ingestion]
 type = "http"
 url = "https://ingestion-production-714d.up.railway.app/ingest/honeytrap"
 method = "POST"
 headers = { "Content-Type" = "application/json" }
 
-# تصفية الأحداث لإرسالها إلى القناة
+# تصفية الأحداث (كل الأحداث ترسل إلى القناة)
 [[filter]]
 type = "events"
 channel = ["ingestion"]
 
-# خدمة SSH مبسطة
+# مثال لخدمة SSH مبسطة
 [service.ssh-simulator]
 type = "ssh-simulator"
-credentials = ["root:root", "admin:admin"]
+credentials = ["root:root", "admin:admin", "user:1234"]
 
 [[port]]
 ports = ["tcp/8022"]
 services = ["ssh-simulator"]
 
-# خدمة HTTP مبسطة
+# مثال لخدمة HTTP
 [service.http]
 type = "http"
 port = 8080
@@ -28,7 +28,7 @@ port = 8080
 ports = ["tcp/8080"]
 services = ["http"]
 
-# تسجيل الأحداث للتصحيح
+# تسجيل الأحداث لمتابعة العمل
 [[logging]]
 output = "stdout"
 level = "debug"
