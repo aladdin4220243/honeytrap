@@ -1,13 +1,16 @@
+# قناة الإخراج إلى ingestion service
 [channel.ingestion]
-type = "http"
+type = "webhook"                  # تغيير من http إلى webhook
 url = "https://ingestion-production-714d.up.railway.app/ingest/honeytrap"
 method = "POST"
 headers = { "Content-Type" = "application/json" }
 
+# تصفية الأحداث
 [[filter]]
 type = "events"
 channel = ["ingestion"]
 
+# خدمة SSH مبسطة
 [service.ssh-simulator]
 type = "ssh-simulator"
 credentials = ["root:root", "admin:admin"]
@@ -16,14 +19,10 @@ credentials = ["root:root", "admin:admin"]
 ports = ["tcp/8022"]
 services = ["ssh-simulator"]
 
-[service.http]
-type = "http"
-port = 8080
+# خدمة HTTP (بدون استخدام service.http غير المناسب)
+# يمكنك إضافة خدمة http بسيطة إذا أردت، لكن دعنا نختبر SSH أولاً.
 
-[[port]]
-ports = ["tcp/8080"]
-services = ["http"]
-
+# تسجيل الأحداث للتصحيح
 [[logging]]
 output = "stdout"
 level = "debug"
