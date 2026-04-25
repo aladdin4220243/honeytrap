@@ -1,21 +1,31 @@
-[channel.ingestion]
-type = "webhook"
-url = "https://ingestion-production-714d.up.railway.app/ingest/honeytrap"
-method = "POST"
-headers = { "Content-Type" = "application/json" }
+# ── Honeytrap config for Railway deployment ────────────────────────────────────
+# Events are written to /logs/events.jsonl
+# The forwarder.py script tails this file and POSTs to Ingestion API
 
-[[filter]]
-type = "events"
-channel = ["ingestion"]
+[honeytrap]
+sensor_name = "honeytrap-railway"
 
-[service.ssh-simulator]
-type = "ssh-simulator"
-credentials = ["root:root", "admin:admin"]
+# ── Listeners ──────────────────────────────────────────────────────────────────
+[listener.socket]
+type = "socket"
 
-[[port]]
-ports = ["tcp/8022"]
-services = ["ssh-simulator"]
+# ── Services ───────────────────────────────────────────────────────────────────
+[service.ssh]
+type       = "ssh"
+port       = "tcp/8022"
 
-[[logging]]
-output = "stdout"
-level = "debug"
+[service.http]
+type       = "http"
+port       = "tcp/8080"
+
+[service.vnc]
+type       = "vnc"
+port       = "tcp/5900"
+
+# ── Pushers ────────────────────────────────────────────────────────────────────
+# Write all events as JSON lines to a file
+# forwarder.py tails this file and sends to Ingestion
+
+[pusher.file]
+type = "file"
+filename = "/logs/events.jsonl"
