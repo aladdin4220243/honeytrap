@@ -1,31 +1,40 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.21-alpine AS builder
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git gcc musl-dev curl
 
-WORKDIR /app
+ENV GOPATH=/go
+ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 
-# نسخ go.mod و go.sum أولاً (للاستفادة من caching)
-COPY go.mod go.sum ./
-RUN go mod download
-
-# نسخ الكود المتبقي
+WORKDIR /src/honeytrap
 COPY . .
 
-# إصلاح مسارات الاستيراد (تحويل imports المحلية إلى imports كاملة)
-RUN find . -name "*.go" -exec sed -i 's|"./services|"github.com/honeytrap/honeytrap/services|g' {} \;
+RUN go mod tidy && \
+    CGO_ENABLED=0 GOOS=linux go build \
+    -a -installsuffix cgo \
+    -o /go/bin/honeytrap .
 
-# بناء honeytrap
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o honeytrap ./cmd/honeytrap
+# ── Runtime stage ──────────────────────────────────────────────────────────────
+FROM python:3.12-alpine
 
-FROM alpine:latest
+RUN apk add --no-cache ca-certificates curl && \
+    update-ca-certificates
 
-RUN apk --no-cache add ca-certificates
-RUN mkdir -p /config /data
+# Python forwarder dependencies
+RUN pip install --no-cache-dir requests
 
-COPY --from=builder /app/honeytrap /usr/local/bin/honeytrap
-COPY config.toml /config/config.toml
+# Create dirs
+RUN mkdir -p /config /data /logs
 
-EXPOSE 8022 8080
+# Copy honeytrap binary
+COPY --from=builder /go/bin/honeytrap /honeytrap/honeytrap
 
-ENTRYPOINT ["honeytrap"]
-CMD ["--config", "/config/config.toml", "--data", "/data/"]
+# Copy config and forwarder
+COPY config.toml         /config/config.toml
+COPY forwarder.py        /forwarder.py
+COPY entrypoint.sh       /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8022 5900 8080
+
+ENTRYPOINT ["/entrypoint.sh"]
